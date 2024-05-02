@@ -1,0 +1,7 @@
+# PostgreSQL
+# ------------------------------------------------------------------------------
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_DB=lynkpage
+POSTGRES_USER=zAYozBlhMLOvZNvODMdQFQLRgnKuISdV
+POSTGRES_PASSWORD=nrTItt5FRNog2U6D976WnF2z0hCJyjFjWSQbstuQ40C9yPcWDF4pH1slhnDw0gQc
