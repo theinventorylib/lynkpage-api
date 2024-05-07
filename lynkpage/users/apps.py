@@ -1,3 +1,4 @@
+from contexlib import suppress
 from django.apps import AppConfig
 from django.utils.translation import gettext_lazy as _
 
@@ -7,7 +8,6 @@ class UsersConfig(AppConfig):
     verbose_name = _("Users")
 
     def ready(self):
-        try:
+        # ussing contexlib.suppress to ignore the ImportError
+        with suppress(ImportError):
             import lynkpage.users.signals  # noqa: F401
-        except ImportError:
-            pass

@@ -1,34 +1,40 @@
 from django.core.cache import cache
 from rest_framework import status
-
-# from django.shortcuts import get_object_or_404
-from rest_framework.decorators import api_view, schema
-from rest_framework.mixins import (
-    ListModelMixin,
-    RetrieveModelMixin,
-    UpdateModelMixin,
-)
+from rest_framework.decorators import api_view
+from rest_framework.decorators import schema
+from rest_framework.mixins import ListModelMixin
+from rest_framework.mixins import RetrieveModelMixin
+from rest_framework.mixins import UpdateModelMixin
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.viewsets import GenericViewSet
+from rest_framework.viewsets import ModelViewSet
 
-# from rest_framework.views import APIView
-from rest_framework.viewsets import GenericViewSet, ModelViewSet
+from lynkpage.users.models import Skills
+from lynkpage.users.models import SocialLinks
+from lynkpage.users.models import User
 
-from lynkpage.users.models import Skills, SocialLinks, User
+from .serializers import SkillsSerializer
+from .serializers import SkillsWriteSerializer
+from .serializers import SocialLinksSerializer
+from .serializers import SocialLinksWriteSerializer
+from .serializers import UserDisplaySerializer
 
-from .serializers import (
-    SkillsSerializer,
-    SkillsWriteSerializer,
-    SocialLinksSerializer,
-    SocialLinksWriteSerializer,
-    UserDisplaySerializer,
-)
-
-# User = get_user_model()
+# Gettin rid of magic values
+__short_username_len = 3
+__long_username_len = 20
+# premium counts
+__premium_social_links_high = 4
+__premium_skills_high = 6
+__premium_social_links_low = 0
+__premium_skills_low = 0
 
 
 class UserViewSet(
-    RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericViewSet
+    RetrieveModelMixin,
+    ListModelMixin,
+    UpdateModelMixin,
+    GenericViewSet,
 ):
     cache_key = "user"
     serializer_class = UserDisplaySerializer
@@ -47,11 +53,11 @@ class UserViewSet(
             return cached_query
 
         # If not cached, retrieve the queryset and cache it
-        queryset = (
-            self.queryset.filter(id=user_id).only("id", "username", "email"),
-        )
+        queryset = (self.queryset.filter(id=user_id).only("id", "username", "email"),)
         cache.set(
-            f"{self.cache_key}_{user_id}", queryset, timeout=60 * 15
+            f"{self.cache_key}_{user_id}",
+            queryset,
+            timeout=60 * 15,
         )  # Cache for 15 minutes
         return queryset
 
@@ -71,7 +77,7 @@ class UserViewSet(
 class UserDeleteView(APIView):
     cache_key = "user"
 
-    def delete(self, request, username=None, format=None):
+    def delete(self, request, username=None, *args, **kwargs):
         try:
             user = self.request.user
             # the user is must be authenticated
@@ -86,13 +92,14 @@ class UserDeleteView(APIView):
 
             # send 204 code
             return Response(
-                status=204, data={"message": "User deleted successfully."}
+                status=204,
+                data={"message": "User deleted successfully."},
             )
-        except Exception:
+        except AssertionError:
             return Response(
                 status=400,
                 data={
-                    "message": "Something went wrong, please try again later."
+                    "message": "Something went wrong, please try again later.",
                 },
             )
 
@@ -129,16 +136,13 @@ class SocialLinksViewSet(ModelViewSet):
         cache.set(f"{self.cache_key}_{user_id}", queryset, timeout=60 * 15)
         return queryset
 
-        # assert isinstance(self.request.user.id, int)
-        # return self.queryset.filter(user=self.request.user.id)
-
     def perform_create(self, serializer):
         # clear the cache
         cache.delete(f"{self.cache_key}_{self.request.user.id}")
         cache.delete(f"portfolio_{self.request.user.username}")
         # update the social_inks count on the user
         user = self.request.user
-        if not user.is_premium and user.social_link_count > 0:
+        if not user.is_premium and user.social_link_count > __premium_social_links_low:
             user.social_link_count -= 1
             user.save()
         else:
@@ -146,7 +150,7 @@ class SocialLinksViewSet(ModelViewSet):
                 {"detail": "You have reached your social link limit."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        serializer.save(user=user)
+        return serializer.save(user=user)
 
     def perform_update(self, serializer):
         # clear the cache
@@ -160,7 +164,7 @@ class SocialLinksViewSet(ModelViewSet):
         cache.delete(f"portfolio_{self.request.user.username}")
         # update the social link count on the user
         user = self.request.user
-        if not user.is_premium and user.social_link_count < 4:
+        if not user.is_premium and user.social_link_count < __premium_social_links_high:
             user.social_link_count += 1
             user.save()
         instance.delete()
@@ -205,7 +209,7 @@ class SkillsViewSet(ModelViewSet):
         cache.delete(f"portfolio_{self.request.user.username}")
         # update the skill count on the user
         user = self.request.user
-        if not user.is_premium and user.skill_count > 0:
+        if not user.is_premium and user.skill_count > __premium_skills_low:
             user.skill_count -= 1
             user.save()
         else:
@@ -230,7 +234,7 @@ class SkillsViewSet(ModelViewSet):
         cache.delete(f"portfolio_{self.request.user.username}")
         # update the skill count on the user
         user = self.request.user
-        if not user.is_premium and user.skill_count < 6:
+        if not user.is_premium and user.skill_count < __premium_skills_high:
             user.skill_count += 1
             user.save()
         instance.delete()
@@ -244,16 +248,16 @@ def validate_username(request):
     username = request.data.get("username", None)
     if username is None:
         return Response({"message": "Username is required."})
-    else:
-        username = username.strip().lower()
+
+    username = username.strip().lower()
     data = {
-        "is_taken": User.objects.filter(username__iexact=username).exists()
+        "is_taken": User.objects.filter(username__iexact=username).exists(),
     }
     if data["is_taken"]:
         data["message"] = "A user with this username already exists."
-    elif len(username) < 3:
+    elif len(username) < __short_username_len:
         data["message"] = "Username must be at least 3 characters long."
-    elif len(username) > 20:
+    elif len(username) > __long_username_len:
         data["message"] = "Username must be less than 20 characters."
     else:
         data["message"] = "Username is available"

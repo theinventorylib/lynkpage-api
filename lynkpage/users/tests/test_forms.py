@@ -1,6 +1,7 @@
 """
 Module for all Form Tests.
 """
+
 from django.utils.translation import gettext_lazy as _
 
 from lynkpage.users.forms import UserAdminCreationForm
@@ -27,12 +28,12 @@ class TestUserAdminCreationForm:
                 "username": user.username,
                 "password1": user.password,
                 "password2": user.password,
-            }
+            },
         )
 
         assert not form.is_valid()
         assert len(form.errors) == 1
         assert "username" in form.errors
         assert form.errors["username"][0] == _(
-            "This username has already been taken."
+            "This username has already been taken.",
         )

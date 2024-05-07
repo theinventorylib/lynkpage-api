@@ -1,18 +1,14 @@
-# from django.contrib.auth import get_user_model
-from rest_framework.serializers import (
-    CharField,
-    ImageField,
-    ModelSerializer,
-    PrimaryKeyRelatedField,
-    SerializerMethodField,
-    ValidationError,
-)
+from rest_framework.serializers import CharField
+from rest_framework.serializers import ImageField
+from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import PrimaryKeyRelatedField
+from rest_framework.serializers import SerializerMethodField
+from rest_framework.serializers import ValidationError
 
-from lynkpage.portfolio.models.personal import PersonalCategory, PersonalData
-from lynkpage.users.api.serializers import (
-    SkillsSerializer,
-    SocialLinksSerializer,
-)
+from lynkpage.portfolio.models.personal import PersonalCategory
+from lynkpage.portfolio.models.personal import PersonalData
+from lynkpage.users.api.serializers import SkillsSerializer
+from lynkpage.users.api.serializers import SocialLinksSerializer
 from lynkpage.users.models import User
 
 
@@ -42,7 +38,6 @@ class PersonalDataSerializer(ModelSerializer):
         serializers (_type_): _description_
     """
 
-    # user = PrimaryKeyRelatedField(read_only=True)
     image = SerializerMethodField("get_image")
     category = CharField(source="category.name")
 
@@ -70,20 +65,7 @@ class PersonalDataSerializer(ModelSerializer):
         """
         if obj.image:
             return obj.get_image()
-
-    # def create(self, validated_data):
-    #     print("vd: ", validated_data)
-    #     category_name = validated_data.pop("category")
-    #     category_name = category_name.pop("name")
-    #     user = validated_data.pop("user")
-    #     category, _ = PersonalCategory.objects.get_or_create(
-    #         name=category_name, user=user
-    #     )
-
-    #     personal_data = PersonalData.objects.create(
-    #         category=category, user=user, **validated_data
-    #     )
-    #     return personal_data
+        return ""
 
 
 class PersonalDataWriteSerializer(ModelSerializer):
@@ -93,7 +75,6 @@ class PersonalDataWriteSerializer(ModelSerializer):
         serializers (_type_): _description_
     """
 
-    # user = PrimaryKeyRelatedField()
     category = CharField(source="category.name")
     max_image_size = 1024 * 1024 * 5  # 5MB
     image = ImageField(
@@ -112,10 +93,10 @@ class PersonalDataWriteSerializer(ModelSerializer):
         ]  # Add other acceptable formats
 
         if value.content_type not in valid_formats:
-            raise ValidationError("Image Format not allowed.")
+            raise ValidationError({"image": "Image Format not allowed."})
 
         if value.size > self.max_image_size:
-            raise ValidationError("Image size is too large.")
+            raise ValidationError({"image": "Image size is too large."})
 
         return value
 
@@ -134,19 +115,19 @@ class PersonalDataWriteSerializer(ModelSerializer):
         ]
 
     def create(self, validated_data):
-        # print("vd: ", validated_data)
         category_name = validated_data.pop("category")
         category_name = category_name.pop("name")
         user = validated_data.pop("user")
-        # user = User.objects.get(id=user_id)
         category, _ = PersonalCategory.objects.get_or_create(
-            name=category_name, user=user
+            name=category_name,
+            user=user,
         )
 
-        personal_data = PersonalData.objects.create(
-            category=category, user=user, **validated_data
+        return PersonalData.objects.create(
+            category=category,
+            user=user,
+            **validated_data,
         )
-        return personal_data
 
     def update(self, instance, validated_data):
         # Handle the update logic for the fields with dotted sources manually
@@ -155,11 +136,11 @@ class PersonalDataWriteSerializer(ModelSerializer):
         user = instance.user
 
         category, _ = PersonalCategory.objects.get_or_create(
-            name=category_name, user=user
+            name=category_name,
+            user=user,
         )
 
         instance.category = category
-        # instance.user = user
 
         # Update the other fields
         for attr, value in validated_data.items():
@@ -178,7 +159,9 @@ class UserDataSerializerView(ModelSerializer):
     """
 
     data = PersonalDataSerializer(
-        source="personaldata_set", many=True, read_only=True
+        source="personaldata_set",
+        many=True,
+        read_only=True,
     )
 
     class Meta:
@@ -196,7 +179,9 @@ class PersonalSerializerView(ModelSerializer):
     """
 
     user_data = UserDataSerializerView(
-        source="personalcategory_set", many=True, read_only=True
+        source="personalcategory_set",
+        many=True,
+        read_only=True,
     )
     skills = SkillsSerializer(many=True, read_only=True)
     social_links = SocialLinksSerializer(many=True, read_only=True)

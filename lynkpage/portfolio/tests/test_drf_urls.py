@@ -1,10 +1,8 @@
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from lynkpage.portfolio.tests.factories import (
-    PersonalCategoryFactory,
-    PersonalDataFactory,
-)
+from lynkpage.portfolio.tests.factories import PersonalCategoryFactory
+from lynkpage.portfolio.tests.factories import PersonalDataFactory
 
 
 # ---------------------- Testing PersonalCategoryFactory --------------------- #
@@ -17,7 +15,7 @@ class TestPersonalCategoryModel(APITestCase):
     def test_personal_categories_detail(self):
         personal_category = PersonalCategoryFactory()
         url = str(
-            "api/v1/portfolio/personal/categories/" + str(personal_category.id)
+            "api/v1/portfolio/personal/categories/" + str(personal_category.id),
         )
         response = self.client.get(url)
         assert response.status_code == status.HTTP_404_NOT_FOUND

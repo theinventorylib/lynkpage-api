@@ -1,28 +1,22 @@
-import os
 import uuid
+from pathlib import Path
 
 from django.conf import settings
-
-# from django.contrib.auth import get_user_model
-from django.db.models import (
-    CASCADE,
-    BooleanField,
-    CharField,
-    ForeignKey,
-    ImageField,
-    Model,
-)
+from django.db.models import CASCADE
+from django.db.models import BooleanField
+from django.db.models import CharField
+from django.db.models import ForeignKey
+from django.db.models import ImageField
+from django.db.models import Model
 
 from lynkpage.users.models import User as PortfolioUser
-
-# PortfolioUser = get_user_model()
 
 
 # image handling(renaming)
 def upload_image(instance, filename):
     ext = filename.split(".")[-1]
     filename = f"{uuid.uuid4()}.{ext}"
-    return os.path.join("images/personal", filename)
+    return Path("images/personal") / filename
 
 
 class PersonalCategory(Model):
@@ -38,21 +32,25 @@ class PersonalCategory(Model):
     class Meta:
         verbose_name_plural = "Personal Categories"
 
+    def __str__(self):
+        return self.name
+
 
 class PersonalData(Model):
     user = ForeignKey(PortfolioUser, on_delete=CASCADE)
     category = ForeignKey(PersonalCategory, on_delete=CASCADE)
-    title = CharField(max_length=100, null=True, blank=True)
-    # description = TextField(null=True, blank=True)
+    title = CharField(max_length=100, blank=True)
     embeded_item = BooleanField(default=False)
     image = ImageField(upload_to=upload_image, null=True, blank=True)
-    link = CharField(max_length=100, null=True, blank=True)
+    link = CharField(max_length=100, blank=True)
+
+    def __str__(self):
+        return self.title
 
     # get the image
     def get_image(self):
         if self.image:
             if settings.DEBUG:
                 return f"http://localhost:8000{self.image.url}"
-            else:
-                return f"http://app.lynkpage.com{self.image.url}"
+            return f"http://app.lynkpage.com{self.image.url}"
         return ""

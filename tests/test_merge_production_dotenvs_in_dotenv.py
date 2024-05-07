@@ -1,3 +1,4 @@
+# ruff: noqa: EXE002
 from pathlib import Path
 
 import pytest

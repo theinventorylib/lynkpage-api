@@ -1,14 +1,21 @@
-from rest_framework.serializers import (
-    CharField,
-    EmailField,
-    ImageField,
-    ModelSerializer,
-    ValidationError,
-)
+from rest_framework.serializers import CharField
+from rest_framework.serializers import EmailField
+from rest_framework.serializers import ImageField
+from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ValidationError
 
-from lynkpage.users.models import Skills, SocialLinks, User
+from lynkpage.users.models import Skills
+from lynkpage.users.models import SocialLinks
+from lynkpage.users.models import User
 
-# User = get_user_model()
+# Gettin rid of magic values
+__short_username_len = 3
+__long_username_len = 20
+# premium counts
+__premium_social_links_high = 4
+__premium_skills_high = 6
+__premium_social_links_low = 0
+__premium_skills_low = 0
 
 
 class SocialLinksSerializer(ModelSerializer):
@@ -34,8 +41,7 @@ class SocialLinksWriteSerializer(ModelSerializer):
 
     def create(self, validated_data):
         user = validated_data.pop("user")
-        social_lnk = SocialLinks.objects.create(user=user, **validated_data)
-        return social_lnk
+        return SocialLinks.objects.create(user=user, **validated_data)
 
     def update(self, instance, validated_data):
         instance.name = validated_data.get("name", instance.name)
@@ -62,12 +68,6 @@ class SkillsWriteSerializer(ModelSerializer):
             "name",
         ]
 
-    # def create(self, validated_data):
-    #     user = validated_data.pop("user")
-    #     skill = Skills.objects.create(user=user, **validated_data)
-    #     data = {"id": skill.id, "name": skill.name}
-    #     return data
-
     def update(self, instance, validated_data):
         instance.name = validated_data.get("name", instance.name)
         instance.save()
@@ -75,7 +75,6 @@ class SkillsWriteSerializer(ModelSerializer):
 
 
 class UserSerializer(ModelSerializer[User]):
-    # image = SerializerMethodField("get_image")
     skills = SkillsSerializer(many=True, read_only=True)
     social_links = SocialLinksSerializer(many=True, read_only=True)
     email = EmailField(read_only=True)
@@ -96,10 +95,10 @@ class UserSerializer(ModelSerializer[User]):
         ]  # Add other acceptable formats
 
         if value.content_type not in valid_formats:
-            raise ValidationError("Image Format not allowed.")
+            raise ValidationError({"image": "Image Format not allowed."})
 
         if value.size > self.max_image_size:
-            raise ValidationError("Image size is too large.")
+            raise ValidationError({"image": "Image size is too large."})
 
         return value
 
@@ -123,15 +122,8 @@ class UserSerializer(ModelSerializer[User]):
             "item_count",
         ]
 
-    # get the user image first
-    # the obj is the user object
-    # def get_image(self, obj) -> str:
-    #     if obj.image:
-    #         return obj.get_image()
-
 
 class UserDisplaySerializer(ModelSerializer[User]):
-    # image = SerializerMethodField("get_image")
     skills = SkillsSerializer(many=True, read_only=True)
     social_links = SocialLinksSerializer(many=True, read_only=True)
     email = EmailField(read_only=True)
@@ -174,18 +166,18 @@ class UserRegSerializer(ModelSerializer):
         self.validated_data["username"] = lower_username
         # check if user name is shorter than 3 char or longer than 20 char
         if (
-            len(self.validated_data["username"]) < 3
-            or len(self.validated_data["username"]) > 20
+            len(self.validated_data["username"]) < __short_username_len
+            or len(self.validated_data["username"]) > __long_username_len
         ):
             raise ValidationError(
-                {"username": "Username must be between 3 and 20 characters."}
+                {"username": "Username must be between 3 and 20 characters."},
             )
 
         # check if password and password2 are the same
         if self.validated_data["password"] != self.validated_data["password2"]:
             raise ValidationError({"password": "Passwords must match."})
-        else:
-            del self.validated_data["password2"]
+
+        del self.validated_data["password2"]
 
         # should check if the username already exists and
         # if it does, raise an error and tell the user

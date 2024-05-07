@@ -1,12 +1,15 @@
 from rest_framework.test import APITestCase
 
-from lynkpage.portfolio.models.personal import PersonalCategory, PersonalData
-from lynkpage.portfolio.tests.factories import (
-    PersonalCategoryFactory,
-    PersonalDataFactory,
-    UserFactory,
-)
+from lynkpage.portfolio.models.personal import PersonalCategory
+from lynkpage.portfolio.models.personal import PersonalData
+from lynkpage.portfolio.tests.factories import PersonalCategoryFactory
+from lynkpage.portfolio.tests.factories import PersonalDataFactory
+from lynkpage.portfolio.tests.factories import UserFactory
 from lynkpage.users.models import User
+
+# Gettin rid of magic values
+__short_username_len = 3
+__long_username_len = 20
 
 
 # ---------------------------- Testing User Factory ---------------------------- #
@@ -16,8 +19,8 @@ class TestUserModel(APITestCase):
         assert isinstance(user, User)
         # test username is a string bewteen 3 and 20 characters
         assert isinstance(user.username, str)
-        assert len(user.username) >= 3
-        assert len(user.username) <= 20
+        assert len(user.username) >= __short_username_len
+        assert len(user.username) <= __long_username_len
         # test email is a string
         assert isinstance(user.email, str)
         # other details are strings
@@ -45,7 +48,7 @@ class TestPersonalDataModel(APITestCase):
         # test title is a string
         assert isinstance(personal_data.title, str)
         # test description is a string
-        # assert isinstance(personal_data.description, str)
+        # assert isinstance(personal_data.description, str) noqa: ERA001
         # test link is a string
         assert isinstance(personal_data.link, str)
         # test user is a user

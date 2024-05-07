@@ -4,10 +4,12 @@ from django.contrib.auth import admin as auth_admin
 from django.contrib.auth import decorators
 from django.utils.translation import gettext_lazy as _
 
-from lynkpage.users.forms import UserAdminChangeForm, UserAdminCreationForm
-from lynkpage.users.models import ClientToken, Skills, SocialLinks, User
-
-# User = get_user_model()
+from lynkpage.users.forms import UserAdminChangeForm
+from lynkpage.users.forms import UserAdminCreationForm
+from lynkpage.users.models import ClientToken
+from lynkpage.users.models import Skills
+from lynkpage.users.models import SocialLinks
+from lynkpage.users.models import User
 
 if settings.DJANGO_ADMIN_FORCE_ALLAUTH:
     # Force the `admin` sign in process to go through the `django-allauth` workflow:
@@ -35,7 +37,7 @@ class UserAdmin(auth_admin.UserAdmin):
                     "skill_count",
                     "category_count",
                     "item_count",
-                )
+                ),
             },
         ),
         (

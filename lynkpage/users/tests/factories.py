@@ -1,10 +1,13 @@
 from collections.abc import Sequence
 from typing import Any
 
-from factory import Faker, SubFactory, post_generation
+from factory import Faker
+from factory import SubFactory
+from factory import post_generation
 from factory.django import DjangoModelFactory
 
-from lynkpage.users.models import Skills, SocialLinks
+from lynkpage.users.models import Skills
+from lynkpage.users.models import SocialLinks
 from lynkpage.users.models import User as UserModel
 
 
@@ -15,9 +18,7 @@ class UserFactory(DjangoModelFactory):
     is_active = True
 
     @post_generation
-    def password(
-        self, create: bool, extracted: Sequence[Any], **kwargs
-    ):  # noqa: FBT001
+    def password(self, create: bool, extracted: Sequence[Any], **kwargs):  # noqa: FBT001
         password = (
             extracted
             if extracted

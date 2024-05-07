@@ -1,0 +1,105 @@
+name: Deploy lynkpage client
+
+on:
+  workflow_run:
+    workflows: [ci]
+    branches: [main]
+    types:
+      - completed
+      - passed
+
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: install the gcloud cli
+        uses: google-github-actions/setup-gcloud@v0
+        with:
+          project_id: ${{ secrets.GOOGLE_PROJECT }}
+          service_account_key: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+          install_components: 'gke-gcloud-auth-plugin'
+          export_default_credentials: true
+
+      - id: google-cloud-auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "latest"
+
+      - name: Set Short SHA
+        run: echo "GIT_SHA=$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
+
+      - name: Build and push Docker image
+        env:
+          GOOGLE_PROJECT: ${{ secrets.GOOGLE_PROJECT }}
+          POSTGRES_HOST: ${{ secrets.DIGITALOCEAN_POSTGRES_HOST }}
+          POSTGRES_PORT: ${{ secrets.DIGITALOCEAN_POSTGRES_PORT }}
+          POSTGRES_DB: ${{ secrets.DIGITALOCEAN_POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.DIGITALOCEAN_POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DIGITALOCEAN_POSTGRES_PASSWORD }}
+          DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE }}
+          DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+          DJANGO_ADMIN_URL: ${{ secrets.DJANGO_ADMIN_URL }}
+          DJANGO_ALLOWED_HOSTS: ${{ secrets.DJANGO_ALLOWED_HOSTS }}
+          DJANGO_SECURE_SSL_REDIRECT: ${{ secrets.DJANGO_SECURE_SSL_REDIRECT }}
+          DJANGO_SERVER_EMAIL: ${{ secrets.DJANGO_SERVER_EMAIL }}
+          # DJANGO_EMAIL_SUBJECT_PREFIX: ${{ secrets.DJANGO_EMAIL_SUBJECT_PREFIX }}
+          MAILJET_API_KEY: ${{ secrets.MAILJET_API_KEY }}
+          MAILJET_DOMAIN: ${{ secrets.MAILJET_DOMAIN_NAME }}
+          DJANGO_ACCOUNT_ALLOW_REGISTRATION: ${{ secrets.DJANGO_ACCOUNT_ALLOW_REGISTRATION }}
+          WEB_CONCURRENCY: ${{ secrets.WEB_CONCURRENCY }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          REDIS_URL: ${{ secrets.REDIS_URL }}
+        run: |
+          gcloud auth configure-docker africa-south1-docker.pkg.dev
+          # docker build -t gcr.io/GOOGLE_PROJECT/$IMAGE_NAME:$GITHUB_SHA .
+          # Build the image
+          docker compose -f production.yml build --parallel --no-cache
+          # Tag the images
+          # api
+          docker tag lynkpage_production_django:latest africa-south1-docker.pkg.dev/$GOOGLE_PROJECT/lynkpage-api/lynkpage_production_django:$GIT_SHA
+          # traefik
+          docker tag lynkpage_production_traefik:latest africa-south1-docker.pkg.dev/$GOOGLE_PROJECT/lynkpage-traefik/lynkpage_production_traefik:$GIT_SHA
+          # redis
+          docker tag lynkpage_production_redis:latest africa-south1-docker.pkg.dev/$GOOGLE_PROJECT/lynkpage-redis/lynkpage_production_redis:$GIT_SHA
+          # postgres
+          docker tag lynkpage_production_postgres:latest africa-south1-docker.pkg.dev/$GOOGLE_PROJECT/lynkpage-postgres/lynkpage_production_postgres:$GIT_SHA
+
+          # Push the images
+          # lynkpage-api
+          docker push africa-south1-docker.pkg.dev/$GOOGLE_PROJECT/lynkpage-api/lynkpage_production_django:$GIT_SHA
+          # lynkpage-traefik
+          docker push africa-south1-docker.pkg.dev/$GOOGLE_PROJECT/lynkpage-traefik/lynkpage_production_traefik:$GIT_SHA
+          # lynkpage-redis
+          docker push africa-south1-docker.pkg.dev/$GOOGLE_PROJECT/lynkpage-redis/lynkpage_production_redis:$GIT_SHA
+          # lynkpage-postgres
+          docker push africa-south1-docker.pkg.dev/$GOOGLE_PROJECT/lynkpage-postgres/lynkpage_production_postgres:$GIT_SHA
+          # remove auth
+          gcloud auth revoke --all
+
+
+      #
+      # - name: deploy to gke
+      #   env:
+      #     GOOGLE_PROJECT: ${{ secrets.GOOGLE_PROJECT }}
+      #   run: |
+      #     gcloud container clusters get-credentials autopilot-cluster-1 --region us-central1
+      #     sed -i "s/GOOGLE_PROJECT/$GOOGLE_PROJECT/g" resources.yaml
+      #     kubectl apply -f resources.yaml

@@ -15,9 +15,31 @@ services:
     depends_on:
       - postgres
       - redis
-    env_file:
-      - ./.envs/.production/.django
-      - ./.envs/.production/.postgres
+    # env_file:
+    #   - ./.envs/.production/.django
+    #   - ./.envs/.production/.postgres
+    environment:
+      DJANGO_SETTINGS_MODULE: $${ secrets.DJANGO_SETTINGS_MODULE }
+      DJANGO_SECRET_KEY: $${ secrets.DJANGO_SECRET_KEY }
+      DJANGO_ADMIN_URL: $${ secrets.DJANGO_ADMIN_URL }
+      DJANGO_ALLOWED_HOSTS: $${ secrets.DJANGO_ALLOWED_HOSTS }
+      DJANGO_SECURE_SSL_REDIRECT: $${ secrets.DJANGO_SECURE_SSL_REDIRECT }
+      DJANGO_SERVER_EMAIL: $${ secrets.DJANGO_SERVER_EMAIL }
+      # DJANGO_EMAIL_SUBJECT_PREFIX: $${ secrets.DJANGO_EMAIL_SUBJECT_PREFIX }
+      MAILJET_API_KEY: $${ secrets.MAILJET_API_KEY }
+      MAILJET_DOMAIN: $${ secrets.MAILJET_DOMAIN_NAME }
+      # POSTMARK_SERVER_TOKEN: $${ secrets.POSTMARK_SERVER_TOKEN }
+      # MAILERSEND_API_TOKEN: $${ secrets.MAILERSEND_API_TOKEN }
+      DJANGO_ACCOUNT_ALLOW_REGISTRATION: $${ secrets.DJANGO_ACCOUNT_ALLOW_REGISTRATION }
+      WEB_CONCURRENCY: $${ secrets.WEB_CONCURRENCY }
+      SENTRY_DSN: $${ secrets.SENTRY_DSN }
+      REDIS_URL: $${ secrets.REDIS_URL }
+      POSTGRES_HOST: $${ secrets.DIGITALOCEAN_POSTGRES_HOST }
+      POSTGRES_PORT: $${ secrets.DIGITALOCEAN_POSTGRES_PORT }
+      POSTGRES_DB: $${ secrets.DIGITALOCEAN_POSTGRES_DB }
+      POSTGRES_USER: $${ secrets.DIGITALOCEAN_POSTGRES_USER }
+      POSTGRES_PASSWORD: $${ secrets.DIGITALOCEAN_POSTGRES_PASSWORD }
+
     command: /start
 
   postgres:
@@ -28,8 +50,15 @@ services:
     volumes:
       - production_postgres_data:/var/lib/postgresql/data
       - production_postgres_data_backups:/backups
-    env_file:
-      - ./.envs/.production/.postgres
+    # env_file:
+    #   - ./.envs/.production/.postgres
+
+    environment:
+      POSTGRES_HOST: $${ secrets.DIGITALOCEAN_POSTGRES_HOST }
+      POSTGRES_PORT: $${ secrets.DIGITALOCEAN_POSTGRES_PORT }
+      POSTGRES_DB: $${ secrets.DIGITALOCEAN_POSTGRES_DB }
+      POSTGRES_USER: $${ secrets.DIGITALOCEAN_POSTGRES_USER }
+      POSTGRES_PASSWORD: $${ secrets.DIGITALOCEAN_POSTGRES_PASSWORD }
 
   traefik:
     build:

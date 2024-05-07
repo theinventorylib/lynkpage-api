@@ -9,6 +9,7 @@ from django.conf import settings
 if typing.TYPE_CHECKING:
     from allauth.socialaccount.models import SocialLogin
     from django.http import HttpRequest
+
     from lynkpage.users.models import User
 
 
@@ -18,19 +19,17 @@ class AccountAdapter(DefaultAccountAdapter):
 
     def get_email_confirmation_url(self, request, emailconfirmation):
         if settings.DEBUG:
-            return_txt = (
-                f"http://localhost:3000/auth/verify/{emailconfirmation.key}"
-            )
+            return_txt = f"http://localhost:3000/auth/verify/{emailconfirmation.key}"
         else:
-            return_txt = (
-                f"https://lynkpage.com/auth/verify/{emailconfirmation.key}"
-            )
+            return_txt = f"https://lynkpage.com/auth/verify/{emailconfirmation.key}"
         return return_txt
 
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
     def is_open_for_signup(
-        self, request: HttpRequest, sociallogin: SocialLogin
+        self,
+        request: HttpRequest,
+        sociallogin: SocialLogin,
     ) -> bool:
         return getattr(settings, "ACCOUNT_ALLOW_REGISTRATION", True)
 

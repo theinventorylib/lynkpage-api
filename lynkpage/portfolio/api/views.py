@@ -2,25 +2,29 @@ from django.core.cache import cache
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.generics import RetrieveAPIView
-from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.parsers import FormParser
+from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from lynkpage.portfolio.api.serializers import (
-    PersonalCategorySerializer,
-    PersonalDataSerializer,
-    PersonalDataWriteSerializer,
-    PersonalSerializerView,
-)
-from lynkpage.portfolio.models.personal import PersonalCategory, PersonalData
+from lynkpage.portfolio.api.serializers import PersonalCategorySerializer
+from lynkpage.portfolio.api.serializers import PersonalDataSerializer
+from lynkpage.portfolio.api.serializers import PersonalDataWriteSerializer
+from lynkpage.portfolio.api.serializers import PersonalSerializerView
+from lynkpage.portfolio.models.personal import PersonalCategory
+from lynkpage.portfolio.models.personal import PersonalData
 from lynkpage.users.models import User as PortfolioUser
-
-# PortfolioUser = get_user_model()
 
 # TODO: turn cache functions to wrapper??
 
+# Magic values fix
+__high_category_limit = 4
+__high_item_limit = 16
+__low_category_limit = 0
+__low_item_limit = 0
 
-# ------------------------------ professional Portfolio View ------------------------------ #
+
+# ------------------- professional Portfolio View ---------------------- #
 class PortfolioViewSet(RetrieveAPIView):
     cache_key = "portfolio"
     serializer_class = PersonalSerializerView
@@ -28,21 +32,11 @@ class PortfolioViewSet(RetrieveAPIView):
     def get_object(self):
         username = self.kwargs.get("username")
         try:
-            # for cache to work, it needs to be cleared on updates from the user and the user's data
-            # cached_user = cache.get(f"{self.cache_key}_{username}")
-            # if cached_user:
-            #     user = cached_user
-            # else:
-            user = get_object_or_404(PortfolioUser, username=username)
-            cache.set(
-                f"{self.cache_key}_{username}",
-                user,
-                timeout=60 * 15,
-            )
-            return user
+            return get_object_or_404(PortfolioUser, username=username)
         except PortfolioUser.DoesNotExist:
             return Response(
-                {"error": "User not found."}, status=status.HTTP_404_NOT_FOUND
+                {"error": "User not found."},
+                status=status.HTTP_404_NOT_FOUND,
             )
 
 
@@ -56,13 +50,13 @@ class PersonalDataViewSet(ModelViewSet):
     def get_queryset(self):
         if self.request.user.is_authenticated:
             cached_query = cache.get(
-                f"{self.cache_key}_{self.request.user.id}"
+                f"{self.cache_key}_{self.request.user.id}",
             )
             if cached_query:
                 return cached_query
 
             data = PersonalData.objects.filter(
-                user=self.request.user
+                user=self.request.user,
             ).select_related(
                 "category",
                 "user",
@@ -141,7 +135,7 @@ class PersonalDataViewSet(ModelViewSet):
         # update the item count on the user
         if (
             not self.request.user.is_premium
-            and self.request.user.item_count < 16
+            and self.request.user.item_count < __high_item_limit
         ):
             user = self.request.user
             user.item_count += 1
@@ -160,13 +154,13 @@ class PersonalCategoryViewSet(ModelViewSet):
         # Filter the queryset based on the username provided in the request
         if self.request.user.is_authenticated:
             cached_query = cache.get(
-                f"{self.cache_key}_{self.request.user.id}"
+                f"{self.cache_key}_{self.request.user.id}",
             )
             if cached_query:
                 return cached_query
 
             data = PersonalCategory.objects.filter(
-                user=self.request.user
+                user=self.request.user,
             ).select_related(
                 "user",
             )
@@ -236,7 +230,7 @@ class PersonalCategoryViewSet(ModelViewSet):
         # update the category count on the user
         if (
             not self.request.user.is_premium
-            and self.request.user.category_count < 4
+            and self.request.user.category_count < __high_category_limit
         ):
             user = self.request.user
             user.category_count += 1

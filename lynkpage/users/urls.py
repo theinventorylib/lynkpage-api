@@ -1,20 +1,16 @@
 from django.conf import settings
-from django.urls import path  # noqa
-from rest_framework.routers import DefaultRouter, SimpleRouter
+from django.urls import path
+from rest_framework.routers import DefaultRouter
+from rest_framework.routers import SimpleRouter
 
-from lynkpage.users.api.views import (
-    SkillsViewSet,
-    SocialLinksViewSet,
-    validate_email,
-    validate_username,
-)
+from lynkpage.users.api.views import SkillsViewSet
+from lynkpage.users.api.views import SocialLinksViewSet
+from lynkpage.users.api.views import validate_email
+from lynkpage.users.api.views import validate_username
 
 app_name = "users"
 
-if settings.DEBUG:
-    router = DefaultRouter()
-else:
-    router = SimpleRouter()
+router = DefaultRouter() if settings.DEBUG else SimpleRouter()
 
 router.register("social_links", SocialLinksViewSet)
 router.register("skills", SkillsViewSet)

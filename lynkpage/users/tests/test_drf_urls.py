@@ -1,13 +1,9 @@
-# from django.urls import resolve, reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-# from lynkpage.users.models import User
-from lynkpage.users.tests.factories import (
-    SkillsFactory,
-    SocialLinksFactory,
-    UserFactory,
-)
+from lynkpage.users.tests.factories import SkillsFactory
+from lynkpage.users.tests.factories import SocialLinksFactory
+from lynkpage.users.tests.factories import UserFactory
 
 
 # ------------------------ Testing User api endpoints ------------------------ #

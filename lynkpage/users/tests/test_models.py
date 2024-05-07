@@ -1,8 +1,13 @@
-# from rest_framework import status
 from rest_framework.test import APITestCase
 
-from lynkpage.users.models import Skills, SocialLinks, User
+from lynkpage.users.models import Skills
+from lynkpage.users.models import SocialLinks
+from lynkpage.users.models import User
 from lynkpage.users.tests.factories import UserFactory
+
+# fixing out magice values
+__short_username_len = 3
+__long_username_len = 20
 
 
 # ---------------------------- Testing User Factory ---------------------------- #
@@ -12,8 +17,8 @@ class TestUserModel(APITestCase):
         assert isinstance(user, User)
         # test username is a string bewteen 3 and 20 characters
         assert isinstance(user.username, str)
-        assert len(user.username) >= 3
-        assert len(user.username) <= 20
+        assert len(user.username) >= __short_username_len
+        assert len(user.username) <= __long_username_len
         # test email is a string
         assert isinstance(user.email, str)
         # other details are strings
