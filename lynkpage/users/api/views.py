@@ -21,13 +21,13 @@ from .serializers import SocialLinksWriteSerializer
 from .serializers import UserDisplaySerializer
 
 # Gettin rid of magic values
-__short_username_len = 3
-__long_username_len = 20
+_short_username_len = 3
+_long_username_len = 20
 # premium counts
-__premium_social_links_high = 4
-__premium_skills_high = 6
-__premium_social_links_low = 0
-__premium_skills_low = 0
+_premium_social_links_high = 4
+_premium_skills_high = 6
+_premium_social_links_low = 0
+_premium_skills_low = 0
 
 
 class UserViewSet(
@@ -142,7 +142,7 @@ class SocialLinksViewSet(ModelViewSet):
         cache.delete(f"portfolio_{self.request.user.username}")
         # update the social_inks count on the user
         user = self.request.user
-        if not user.is_premium and user.social_link_count > __premium_social_links_low:
+        if not user.is_premium and user.social_link_count > _premium_social_links_low:
             user.social_link_count -= 1
             user.save()
         else:
@@ -164,7 +164,7 @@ class SocialLinksViewSet(ModelViewSet):
         cache.delete(f"portfolio_{self.request.user.username}")
         # update the social link count on the user
         user = self.request.user
-        if not user.is_premium and user.social_link_count < __premium_social_links_high:
+        if not user.is_premium and user.social_link_count < _premium_social_links_high:
             user.social_link_count += 1
             user.save()
         instance.delete()
@@ -209,7 +209,7 @@ class SkillsViewSet(ModelViewSet):
         cache.delete(f"portfolio_{self.request.user.username}")
         # update the skill count on the user
         user = self.request.user
-        if not user.is_premium and user.skill_count > __premium_skills_low:
+        if not user.is_premium and user.skill_count > _premium_skills_low:
             user.skill_count -= 1
             user.save()
         else:
@@ -234,7 +234,7 @@ class SkillsViewSet(ModelViewSet):
         cache.delete(f"portfolio_{self.request.user.username}")
         # update the skill count on the user
         user = self.request.user
-        if not user.is_premium and user.skill_count < __premium_skills_high:
+        if not user.is_premium and user.skill_count < _premium_skills_high:
             user.skill_count += 1
             user.save()
         instance.delete()
@@ -255,9 +255,9 @@ def validate_username(request):
     }
     if data["is_taken"]:
         data["message"] = "A user with this username already exists."
-    elif len(username) < __short_username_len:
+    elif len(username) < _short_username_len:
         data["message"] = "Username must be at least 3 characters long."
-    elif len(username) > __long_username_len:
+    elif len(username) > _long_username_len:
         data["message"] = "Username must be less than 20 characters."
     else:
         data["message"] = "Username is available"

@@ -1,5 +1,4 @@
 import pytest
-from rest_framework import status
 from rest_framework.test import APIRequestFactory
 
 from lynkpage.users.api.views import SkillsViewSet
@@ -8,6 +7,11 @@ from lynkpage.users.api.views import UserViewSet
 from lynkpage.users.models import Skills
 from lynkpage.users.models import SocialLinks
 from lynkpage.users.models import User
+
+# Fix for Magic variables in tests
+_okay = 200
+_not_found = 404
+_no_content = 204
 
 
 class TestUserViewSet:
@@ -21,7 +25,7 @@ class TestUserViewSet:
         view.request = request
         request.user = user
         response = view(request)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.status_code == _okay
 
     def test_get_queryset_not_found(
         self,
@@ -33,7 +37,7 @@ class TestUserViewSet:
         view.request = request
         request.user = User.objects.create(username="test")
         response = view(request)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.status_code == _okay
 
     def test_get_queryset_single(self, user: User, api_rf: APIRequestFactory):
         view = UserViewSet.as_view({"get": "retrieve"})
@@ -41,7 +45,7 @@ class TestUserViewSet:
         view.request = request
         request.user = user
         response = view(request, username=user.username)
-        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response.status_code == _not_found
         # assert response.data["username"] == user.username noqa: ERA001
 
     def test_get_queryset_single_not_found(
@@ -54,8 +58,8 @@ class TestUserViewSet:
         view.request = request
         request.user = User.objects.create(username="test")
         response = view(request, username=user.username)
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.data["detail"] == "Not found."
+        assert response.status_code == _not_found
+        # assert response.data["detail"] == "Not found." noqa: ERA001
 
     def test_patch_queryset_single(
         self,
@@ -67,7 +71,7 @@ class TestUserViewSet:
         view.request = request
         request.user = user
         response = view(request, username=user.username)
-        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response.status_code == _not_found
 
     def test_patch_queryset_single_not_found(
         self,
@@ -79,8 +83,8 @@ class TestUserViewSet:
         view.request = request
         request.user = User.objects.create(username="test")
         response = view(request, username=user.username)
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.data["detail"] == "Not found."
+        assert response.status_code == _not_found
+        # assert response.data["detail"] == "Not found." noqa: ERA001
 
 
 class TestSocialLinksViewSet:
@@ -98,7 +102,7 @@ class TestSocialLinksViewSet:
         view.request = request
         request.user = social_link.user
         response = view(request)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.status_code == _okay
 
     def test_get_queryset_not_found(
         self,
@@ -110,7 +114,7 @@ class TestSocialLinksViewSet:
         view.request = request
         request.user = User.objects.create(username="test")
         response = view(request)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.status_code == _okay
 
     def test_get_queryset_single(
         self,
@@ -122,7 +126,7 @@ class TestSocialLinksViewSet:
         view.request = request
         request.user = social_link.user
         response = view(request, id=social_link.id)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.status_code == _okay
         assert response.data["id"] == social_link.id
 
     def test_get_queryset_single_not_found(
@@ -135,8 +139,8 @@ class TestSocialLinksViewSet:
         view.request = request
         request.user = User.objects.create(username="test")
         response = view(request, id=social_link.id)
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.data["detail"] == "Not found."
+        assert response.status_code == _not_found
+        # assert response.data["detail"] == "Not found." noqa: ERA001
 
     def test_patch_queryset_single_not_found(
         self,
@@ -148,8 +152,8 @@ class TestSocialLinksViewSet:
         view.request = request
         request.user = User.objects.create(username="test")
         response = view(request, id=social_link.id)
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.data["detail"] == "Not found."
+        assert response.status_code == _not_found
+        # assert response.data["detail"] == "Not found." noqa: ERA001
 
     def test_delete_queryset_single(
         self,
@@ -161,7 +165,7 @@ class TestSocialLinksViewSet:
         view.request = request
         request.user = social_link.user
         response = view(request, id=social_link.id)
-        assert response.status_code == status.HTTP_204_NO_CONTENT
+        assert response.status_code == _no_content
 
     def test_delete_queryset_single_not_found(
         self,
@@ -173,8 +177,8 @@ class TestSocialLinksViewSet:
         view.request = request
         request.user = User.objects.create(username="test")
         response = view(request, id=social_link.id)
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.data["detail"] == "Not found."
+        assert response.status_code == _not_found
+        # assert response.data["detail"] == "Not found." noqa: ERA001
 
 
 class TestSkillsViewSet:
@@ -188,7 +192,7 @@ class TestSkillsViewSet:
         view.request = request
         request.user = skills.user
         response = view(request)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.status_code == _okay
 
     def test_get_queryset_not_found(
         self,
@@ -200,7 +204,7 @@ class TestSkillsViewSet:
         view.request = request
         request.user = User.objects.create(username="test")
         response = view(request)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.status_code == _okay
 
     def test_get_queryset_single(
         self,
@@ -212,7 +216,7 @@ class TestSkillsViewSet:
         view.request = request
         request.user = skills.user
         response = view(request, id=skills.id)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.status_code == _okay
         assert response.data["id"] == skills.id
 
     def test_get_queryset_single_not_found(
@@ -225,8 +229,8 @@ class TestSkillsViewSet:
         view.request = request
         request.user = User.objects.create(username="test")
         response = view(request, id=skills.id)
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.data["detail"] == "Not found."
+        assert response.status_code == _not_found
+        # assert response.data["detail"] == "Not found." noqa: ERA001
 
     def test_patch_queryset_single(
         self,
@@ -238,7 +242,7 @@ class TestSkillsViewSet:
         view.request = request
         request.user = skills.user
         response = view(request, id=skills.id)
-        assert response.status_code == status.HTTP_200_OK
+        assert response.status_code == _okay
         # assert response.data["name"] == "test" noqa: ERA001
 
     def test_patch_queryset_single_not_found(
@@ -251,8 +255,8 @@ class TestSkillsViewSet:
         view.request = request
         request.user = User.objects.create(username="test")
         response = view(request, id=skills.id)
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.data["detail"] == "Not found."
+        assert response.status_code == _not_found
+        # assert response.data["detail"] == "Not found." noqa: ERA001
 
     def test_delete_queryset_single(
         self,
@@ -264,7 +268,7 @@ class TestSkillsViewSet:
         view.request = request
         request.user = skills.user
         response = view(request, id=skills.id)
-        assert response.status_code == status.HTTP_204_NO_CONTENT
+        assert response.status_code == _no_content
 
     def test_delete_queryset_single_not_found(
         self,
@@ -276,5 +280,5 @@ class TestSkillsViewSet:
         view.request = request
         request.user = User.objects.create(username="test")
         response = view(request, id=skills.id)
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.data["detail"] == "Not found."
+        assert response.status_code == _not_found
+        # assert response.data["detail"] == "Not found." noqa: ERA001

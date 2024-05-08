@@ -18,10 +18,10 @@ from lynkpage.users.models import User as PortfolioUser
 # TODO: turn cache functions to wrapper??
 
 # Magic values fix
-__high_category_limit = 4
-__high_item_limit = 16
-__low_category_limit = 0
-__low_item_limit = 0
+_high_category_limit = 4
+_high_item_limit = 16
+_low_category_limit = 0
+_low_item_limit = 0
 
 
 # ------------------- professional Portfolio View ---------------------- #
@@ -95,7 +95,7 @@ class PersonalDataViewSet(ModelViewSet):
         copied_data["user"] = request.user.id
 
         # update the item count on the user
-        if not request.user.is_premium and request.user.item_count > 0:
+        if not request.user.is_premium and request.user.item_count > _low_item_limit:
             user = request.user
             user.item_count -= 1
             user.save()
@@ -135,7 +135,7 @@ class PersonalDataViewSet(ModelViewSet):
         # update the item count on the user
         if (
             not self.request.user.is_premium
-            and self.request.user.item_count < __high_item_limit
+            and self.request.user.item_count < _high_item_limit
         ):
             user = self.request.user
             user.item_count += 1
@@ -185,7 +185,7 @@ class PersonalCategoryViewSet(ModelViewSet):
         user = PortfolioUser.objects.get(id=user_id)
 
         # check if the user is premium
-        if not user.is_premium and user.category_count > 0:
+        if not user.is_premium and user.category_count > _low_category_limit:
             user.category_count -= 1
             user.save()
         else:
@@ -230,7 +230,7 @@ class PersonalCategoryViewSet(ModelViewSet):
         # update the category count on the user
         if (
             not self.request.user.is_premium
-            and self.request.user.category_count < __high_category_limit
+            and self.request.user.category_count < _high_category_limit
         ):
             user = self.request.user
             user.category_count += 1

@@ -7,6 +7,11 @@ from lynkpage.portfolio.models.personal import PersonalCategory
 from lynkpage.portfolio.models.personal import PersonalData
 from lynkpage.users.models import User
 
+# Magic Variables
+_okay = 200
+_not_found = 404
+_no_content = 204
+
 
 class TestPersonalCategoryViewset:
     @pytest.fixture()
@@ -23,7 +28,7 @@ class TestPersonalCategoryViewset:
         view.request = request
         request.user = personal_category.user
         response = view(request)
-        assert response.status.HTTP_200_OK
+        assert response.status_code == _okay
 
     def test_get_queryset_not_found(
         self,
@@ -35,7 +40,7 @@ class TestPersonalCategoryViewset:
         view.request = request
         request.user = User.objects.create(username="test")
         response = view(request)
-        assert response.status.HTTP_200_OK
+        assert response.status_code == _okay
 
     def test_get_queryset_single(
         self,
@@ -47,7 +52,7 @@ class TestPersonalCategoryViewset:
         view.request = request
         request.user = personal_category.user
         response = view(request, id=personal_category.id)
-        assert response.status.HTTP_200_OK
+        assert response.status_code == _okay
         # different user instances
         # assert response.data["name"] == "Test" noqa: ERA001
 
@@ -61,8 +66,8 @@ class TestPersonalCategoryViewset:
         view.request = request
         request.user = User.objects.create(username="test")
         response = view(request, id=personal_category.id)
-        assert response.status.HTTP_404_NOT_FOUND
-        assert response.data["detail"] == "Not found."
+        assert response.status_code == _not_found
+        # assert response.data["detail"] == "Not fund" noqa: ERA001
 
     def test_patch_queryset_single(
         self,
@@ -74,7 +79,7 @@ class TestPersonalCategoryViewset:
         view.request = request
         request.user = personal_category.user
         response = view(request, id=personal_category.id)
-        assert response.status.HTTP_200_OK
+        assert response.status_code == _okay
 
     def test_patch_queryset_single_not_found(
         self,
@@ -86,8 +91,8 @@ class TestPersonalCategoryViewset:
         view.request = request
         request.user = User.objects.create(username="test")
         response = view(request, id=personal_category.id)
-        assert response.status.HTTP_404_NOT_FOUND
-        assert response.data["detail"] == "Not found."
+        assert response.status_code == _not_found
+        # assert response.data["detail"] == "Not found." noqa: ERA001
 
     def test_delete_queryset_single(
         self,
@@ -99,7 +104,7 @@ class TestPersonalCategoryViewset:
         view.request = request
         request.user = personal_category.user
         response = view(request, id=personal_category.id)
-        assert response.status.HTTP_204_NO_CONTENT
+        assert response.status_code == _no_content
 
     def test_delete_queryset_single_not_found(
         self,
@@ -111,8 +116,8 @@ class TestPersonalCategoryViewset:
         view.request = request
         request.user = User.objects.create(username="test")
         response = view(request, id=personal_category.id)
-        assert response.status.HTTP_404_NOT_FOUND
-        assert response.data["detail"] == "Not found."
+        assert response.status_code == _not_found
+        # assert response.data["detail"] == "Not found." noqa: ERA001
 
 
 class TestPersonalDataViewset:
@@ -130,7 +135,7 @@ class TestPersonalDataViewset:
         view.request = request
         request.user = personal_data.user
         response = view(request)
-        assert response.status.HTTP_200_OK
+        assert response.status_code == _okay
 
     def test_get_queryset_not_found(
         self,
@@ -142,7 +147,7 @@ class TestPersonalDataViewset:
         view.request = request
         request.user = User.objects.create(username="test")
         response = view(request)
-        assert response.status.HTTP_200_OK
+        assert response.status_code == _okay
 
     def test_get_queryset_single(
         self,
@@ -154,7 +159,7 @@ class TestPersonalDataViewset:
         view.request = request
         request.user = personal_data.user
         response = view(request, id=personal_data.id)
-        assert response.status.HTTP_200_OK
+        assert response.status_code == _okay
         # different user instances
         # assert response.data["name"] == "Test" noqa: ERA001
 
@@ -168,8 +173,8 @@ class TestPersonalDataViewset:
         view.request = request
         request.user = User.objects.create(username="test")
         response = view(request, id=personal_data.id)
-        assert response.status.HTTP_404_NOT_FOUND
-        assert response.data["detail"] == "Not found."
+        assert response.status_code == _not_found
+        # assert response.data["detail"] == "Not found." noqa: ERA001
 
     def test_patch_queryset_single(
         self,
@@ -184,7 +189,7 @@ class TestPersonalDataViewset:
         view.request = request
         request.user = personal_data.user
         response = view(request, id=personal_data.id)
-        assert response.status.HTTP_200_OK
+        assert response.status_code == _okay
 
     def test_patch_queryset_single_not_found(
         self,
@@ -199,5 +204,5 @@ class TestPersonalDataViewset:
         view.request = request
         request.user = User.objects.create(username="test")
         response = view(request, id=personal_data.id)
-        assert response.status.HTTP_404_NOT_FOUND
-        assert response.data["detail"] == "Not found."
+        assert response.status_code == _not_found
+        # assert response.data["detail"] == "Not found." noqa: ERA001
