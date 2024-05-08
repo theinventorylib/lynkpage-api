@@ -76,21 +76,21 @@ jobs:
           # api
           docker tag lynkpage_production_django:latest africa-south1-docker.pkg.dev/$GOOGLE_PROJECT/lynkpage-api/lynkpage_production_django:$GIT_SHA
           # traefik
-          docker tag lynkpage_production_traefik:latest africa-south1-docker.pkg.dev/$GOOGLE_PROJECT/lynkpage-traefik/lynkpage_production_traefik:$GIT_SHA
+          docker tag lynkpage_production_traefik:latest africa-south1-docker.pkg.dev/$GOOGLE_PROJECT/lynkpage-api/lynkpage_production_traefik:$GIT_SHA
           # redis
           # docker tag redis:latest africa-south1-docker.pkg.dev/$GOOGLE_PROJECT/lynkpage-redis/lynkpage_production_redis:$GIT_SHA
           # postgres
-          docker tag lynkpage_production_postgres:latest africa-south1-docker.pkg.dev/$GOOGLE_PROJECT/lynkpage-postgres/lynkpage_production_postgres:$GIT_SHA
+          docker tag lynkpage_production_postgres:latest africa-south1-docker.pkg.dev/$GOOGLE_PROJECT/lynkpage-api/lynkpage_production_postgres:$GIT_SHA
 
           # Push the images
           # lynkpage-api
           docker push africa-south1-docker.pkg.dev/$GOOGLE_PROJECT/lynkpage-api/lynkpage_production_django:$GIT_SHA
           # lynkpage-traefik
-          docker push africa-south1-docker.pkg.dev/$GOOGLE_PROJECT/lynkpage-traefik/lynkpage_production_traefik:$GIT_SHA
+          docker push africa-south1-docker.pkg.dev/$GOOGLE_PROJECT/lynkpage-api/lynkpage_production_traefik:$GIT_SHA
           # lynkpage-redis
           # docker push africa-south1-docker.pkg.dev/$GOOGLE_PROJECT/lynkpage-redis/lynkpage_production_redis:$GIT_SHA
           # lynkpage-postgres
-          docker push africa-south1-docker.pkg.dev/$GOOGLE_PROJECT/lynkpage-postgres/lynkpage_production_postgres:$GIT_SHA
+          docker push africa-south1-docker.pkg.dev/$GOOGLE_PROJECT/lynkpage-api/lynkpage_production_postgres:$GIT_SHA
           # remove auth
           gcloud auth revoke --all
 
