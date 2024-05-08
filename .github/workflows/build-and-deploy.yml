@@ -1,4 +1,4 @@
-name: Deploy lynkpage client
+name: Deploy lynkpage API
 
 on:
   workflow_run:
