@@ -78,7 +78,7 @@ jobs:
           # traefik
           docker tag lynkpage_production_traefik:latest africa-south1-docker.pkg.dev/$GOOGLE_PROJECT/lynkpage-traefik/lynkpage_production_traefik:$GIT_SHA
           # redis
-          docker tag lynkpage_production_redis:latest africa-south1-docker.pkg.dev/$GOOGLE_PROJECT/lynkpage-redis/lynkpage_production_redis:$GIT_SHA
+          docker tag redis:latest africa-south1-docker.pkg.dev/$GOOGLE_PROJECT/lynkpage-redis/lynkpage_production_redis:$GIT_SHA
           # postgres
           docker tag lynkpage_production_postgres:latest africa-south1-docker.pkg.dev/$GOOGLE_PROJECT/lynkpage-postgres/lynkpage_production_postgres:$GIT_SHA
 
