@@ -17,14 +17,6 @@ jobs:
       - name: Checkout Code Repository
         uses: actions/checkout@v4
 
-      - name: install the gcloud cli
-        uses: google-github-actions/setup-gcloud@v0
-        with:
-          project_id: ${{ secrets.GOOGLE_PROJECT }}
-          service_account_key: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
-          install_components: 'gke-gcloud-auth-plugin'
-          export_default_credentials: true
-
       - id: google-cloud-auth
         uses: google-github-actions/auth@v2
         with:

@@ -9,13 +9,13 @@ from lynkpage.users.models import SocialLinks
 from lynkpage.users.models import User
 
 # Gettin rid of magic values
-__short_username_len = 3
-__long_username_len = 20
+_short_username_len = 3
+_long_username_len = 20
 # premium counts
-__premium_social_links_high = 4
-__premium_skills_high = 6
-__premium_social_links_low = 0
-__premium_skills_low = 0
+_premium_social_links_high = 4
+_premium_skills_high = 6
+_premium_social_links_low = 0
+_premium_skills_low = 0
 
 
 class SocialLinksSerializer(ModelSerializer):
@@ -166,8 +166,8 @@ class UserRegSerializer(ModelSerializer):
         self.validated_data["username"] = lower_username
         # check if user name is shorter than 3 char or longer than 20 char
         if (
-            len(self.validated_data["username"]) < __short_username_len
-            or len(self.validated_data["username"]) > __long_username_len
+            len(self.validated_data["username"]) < _short_username_len
+            or len(self.validated_data["username"]) > _long_username_len
         ):
             raise ValidationError(
                 {"username": "Username must be between 3 and 20 characters."},
